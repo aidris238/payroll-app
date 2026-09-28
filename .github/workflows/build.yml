@@ -38,9 +38,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller certifi rich
 
-      - name: Build executable
+      - name: Build executable (Linux)
+        if: runner.os == 'Linux'
         run: |
           pyinstaller --onefile --strip --optimize=2 --name ${{ matrix.binary_name }} payroll.py
+
+      - name: Build executable (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          # Get Python DLL path
+          $pythonDll = Join-Path (Split-Path (Get-Command python).Source) "python311.dll"
+          pyinstaller --onefile --strip --optimize=2 --name ${{ matrix.binary_name }} --add-data "$pythonDll;." payroll.py
 
       - name: Rename for Windows
         if: runner.os == 'Windows'
