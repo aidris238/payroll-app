@@ -1,7 +1,8 @@
 # Build artifacts
 build/
 payroll.spec
-!payroll_windows.spec
+payroll_windows.spec
+!payroll_gui.spec
 
 # Python cache
 __pycache__/

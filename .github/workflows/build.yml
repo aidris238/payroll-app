@@ -16,11 +16,11 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: payroll-linux
-            binary_name: payroll
+            binary_name: PayrollPro
             ext: ""
           - os: windows-latest
             artifact_name: payroll-windows
-            binary_name: payroll
+            binary_name: PayrollPro
             ext: ".exe"
     runs-on: ${{ matrix.os }}
 
@@ -41,12 +41,12 @@ jobs:
       - name: Build executable (Linux)
         if: runner.os == 'Linux'
         run: |
-          pyinstaller --onefile --strip --optimize=1 --name ${{ matrix.binary_name }} payroll.py
+          pyinstaller --onefile --optimize=1 --name PayrollPro payroll_gui.py
 
       - name: Build executable (Windows)
         if: runner.os == 'Windows'
         run: |
-          pyinstaller payroll_windows.spec
+          pyinstaller payroll_gui.spec
 
       - name: Rename for Windows
         if: runner.os == 'Windows'
@@ -86,24 +86,23 @@ jobs:
         run: |
           TAG=${{ github.ref_name }}
           cat > release_notes.md << 'EOF'
-          ## Aplikasi Penggajian Karyawan
+          ## Aplikasi Penggajian Karyawan PRO (GUI Desktop)
 
           ### Fitur
-          - Perhitungan gaji mingguan (pokok + lembur + lembur libur)
-          - Pembulatan menit ke atas (default 15 menit)
+          - 5 tab: Dashboard, Data Karyawan, Hitung Gaji, Laporan, Pengaturan
+          - Menu bar (File / Karyawan / Bantuan), database SQLite lokal
+          - Gaji mingguan: pokok + lembur + lembur libur, pembulatan menit
+          - Export laporan ke CSV
 
           ### Download
-          - **Linux**: `payroll` -- chmod +x -- ./payroll
-          - **Windows**: `payroll.exe` -- double-click jalan
+          - **Linux**: `PayrollPro` -- chmod +x -- ./PayrollPro (butuh X server)
+          - **Windows**: `PayrollPro.exe` -- double-click, tanpa install Python
 
           ### Cara Pakai (source)
-          pip install rich pyinstaller
-          pyinstaller --onefile --strip --optimize=2 payroll.py
-
-          Final size: Linux 12 MB, Windows 10 MB
+          python payroll_gui.py   (stdlib only, tanpa install apa pun)
           EOF
           gh release create "$TAG" \
-            release/payroll \
-            release/payroll.exe \
-            --title "$TAG - Payroll App Windows & Linux" \
+            release/PayrollPro \
+            release/PayrollPro.exe \
+            --title "$TAG - PayrollPro GUI Windows & Linux" \
             --notes-file release_notes.md
