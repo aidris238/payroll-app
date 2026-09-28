@@ -38,6 +38,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller certifi rich
 
+      - name: Locate Python DLL (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $dll = python -c "import sys, os; dll=os.path.join(sys.base_exec_prefix, 'python311.dll'); print(dll if os.path.exists(dll) else '')"
+          if (-not (Test-Path $dll)) {
+            $dll = python -c "import sys, os; dll=os.path.join(sys.exec_prefix, 'python311.dll'); print(dll if os.path.exists(dll) else '')"
+          }
+          if (-not (Test-Path $dll)) {
+            $dll = Get-ChildItem -Path (Split-Path (Get-Command python).Source) -Recurse -Filter "python311.dll" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (-not (Test-Path $dll)) {
+            Write-Error "Python DLL not found"
+            exit 1
+          }
+          Write-Host "Found Python DLL: $dll"
+          echo "PYTHON_DLL=$dll" >> $env:GITHUB_ENV
+
       - name: Build executable (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -45,10 +63,16 @@ jobs:
 
       - name: Build executable (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          PYTHON_DLL: ${{ env.PYTHON_DLL }}
         run: |
-          # Get Python DLL path
-          $pythonDll = Join-Path (Split-Path (Get-Command python).Source) "python311.dll"
-          pyinstaller --onefile --strip --optimize=2 --name ${{ matrix.binary_name }} --add-data "$pythonDll;." payroll.py
+          if (-not (Test-Path $env:PYTHON_DLL)) {
+            Write-Error "Python DLL not found at $env:PYTHON_DLL"
+            exit 1
+          }
+          Write-Host "Bundling Python DLL: $env:PYTHON_DLL"
+          pyinstaller --onefile --strip --optimize=2 --name ${{ matrix.binary_name }} --add-binary "$env:PYTHON_DLL;." payroll.py
 
       - name: Rename for Windows
         if: runner.os == 'Windows'
@@ -88,21 +112,19 @@ jobs:
         run: |
           TAG=${{ github.ref_name }}
           cat > release_notes.md << 'EOF'
-          ## 📊 Aplikasi Penggajian Karyawan
+          ## Aplikasi Penggajian Karyawan
 
-          ### ✨ Fitur
+          ### Fitur
           - Perhitungan gaji mingguan (pokok + lembur + lembur libur)
           - Pembulatan menit ke atas (default 15 menit)
 
-          ### 📥 Download
-          - **Linux**: `payroll` — chmod +x → ./payroll
-          - **Windows**: `payroll.exe` — double-click jalan
+          ### Download
+          - **Linux**: `payroll` -- chmod +x -- ./payroll
+          - **Windows**: `payroll.exe` -- double-click jalan
 
-          ### 🚀 Cara Pakai (source)
-          ```bash
+          ### Cara Pakai (source)
           pip install rich pyinstaller
           pyinstaller --onefile --strip --optimize=2 payroll.py
-          ```
 
           Final size: Linux 12 MB, Windows 10 MB
           EOF
