@@ -1,0 +1,36 @@
+{
+  "config": {
+    "upah_per_jam": 50000.0,
+    "jam_kerja_normal_per_hari": 8.0,
+    "hari_kerja_per_minggu": 6,
+    "jam_lembur_mulai": 8.0,
+    "rate_lembur": 1.5,
+    "rate_lembur_hari_libur": 2.0,
+    "pembulatan_menit": 15
+  },
+  "hours": {
+    "jam_normal": 48.0,
+    "jam_lembur": 5.0,
+    "jam_lembur_libur": 0.0,
+    "menit_tambahan": 30
+  },
+  "result": {
+    "gaji_pokok": 2400000.0,
+    "gaji_lembur": 412500.0,
+    "gaji_lembur_libur": 0.0,
+    "total_gaji": 2812500.0,
+    "rincian": {
+      "upah_per_jam": 50000.0,
+      "jam_kerja_normal_per_hari": 8.0,
+      "hari_kerja_per_minggu": 6,
+      "jam_normal_dibayar": 48.0,
+      "jam_lembur_total": 5.5,
+      "jam_lembur_libur": 0.0,
+      "menit_tambahan": 30,
+      "menit_dibulatkan_jam": 0.5,
+      "rate_lembur": 1.5,
+      "rate_lembur_libur": 2.0,
+      "pembulatan_menit": 15
+    }
+  }
+}
