@@ -56,6 +56,9 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
@@ -69,11 +72,30 @@ jobs:
           path: release/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            release/payroll
-            release/payroll.exe
-          generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 📊 Aplikasi Penggajian Karyawan
+
+          ### ✨ Fitur
+          - Perhitungan gaji mingguan (pokok + lembur + lembur libur)
+          - Pembulatan menit ke atas (default 15 menit)
+
+          ### 📥 Download
+          - **Linux**: `payroll` — chmod +x → ./payroll
+          - **Windows**: `payroll.exe` — double-click jalan
+
+          ### 🚀 Cara Pakai (source)
+          ```bash
+          pip install rich pyinstaller
+          pyinstaller --onefile --strip --optimize=2 payroll.py
+          ```
+
+          Final size: Linux 12 MB, Windows 10 MB
+          EOF
+          gh release create v1.1.0 \
+            release/payroll \
+            release/payroll.exe \
+            --title "v1.1.0 - Payroll App Windows & Linux" \
+            --notes-file release_notes.md
