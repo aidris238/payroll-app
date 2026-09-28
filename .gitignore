@@ -1,0 +1,21 @@
+# Build artifacts
+dist/
+build/
+*.spec
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment
+venv/
+env/
+
+# Output file
+payroll_result.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
