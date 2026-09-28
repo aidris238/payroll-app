@@ -25,7 +25,7 @@ Butuh Python 3.10+ (sudah termasuk tkinter di installer standar).
 
 ## Alur kerja
 
-1. **Data Karyawan** — tambah nama + upah/jam (dialog popup, validasi inline).
+1. **Data Karyawan** — tambah nama + upah/jam (dialog popup, validasi inline, angka otomatis bertitik).
 2. **Hitung Gaji** — pilih karyawan, isi jam & menit. Hasil terhitung
    otomatis setiap ketikan. Klik "Tampilkan Slip" untuk slip gaji rapi
    (bisa salin total, simpan .txt, atau langsung simpan ke laporan).
@@ -58,7 +58,7 @@ payroll_gui.spec  # build Windows (windowed, strip=False)
 tests_smoke.py    # test logika + DB  → python tests_smoke.py
 tests_gui.py      # test GUI headless  → python tests_gui.py
 run.bat / run.sh  # jalan cepat dari source
-docs/PRD-v3.md    # PRD aktif
+docs/PRD-v4.md    # PRD aktif
 payroll.py        # CLI lama (arsip, tidak dikembangkan)
 ```
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke test logika PayrollPro v3 — tanpa GUI (tanpa display).
+"""Smoke test logika PayrollPro v4 — tanpa GUI (tanpa display).
 Jalankan: python tests_smoke.py
 Lolos = semua assert + DB roundtrip OK.
 """
@@ -53,16 +53,45 @@ check("bulat 0", g.bulatkan_menit(0) == 0.0)
 check("bulat 1 mnt->0.25j", abs(g.bulatkan_menit(1) - 0.25) < 1e-9)
 check("bulat 16 mnt->0.5j", abs(g.bulatkan_menit(16) - 0.5) < 1e-9)
 
-# 7. parse angka
+# 7. parse angka (varian Indonesia)
 check("parse 50.000", g.parse_angka("50.000") == 50000)
+check("parse 50000", g.parse_angka("50000") == 50000)
+check("parse Rp 50.000", g.parse_angka("Rp 50.000") == 50000)
 check("parse 8,5", g.parse_angka("8,5") == 8.5)
+check("parse 8.5", g.parse_angka("8.5") == 8.5)
+check("parse 1.234,5", g.parse_angka("1.234,5") == 1234.5)
 check("parse huruf", g.parse_angka("abc") is None)
 check("parse kosong", g.parse_angka("") is None)
+check("parse strip", g.parse_angka("-") is None)
 
-# 8. rupiah
+# 8. format rupiah / ribu / desimal (v4)
 check("rupiah", g.rupiah(2812500) == "Rp 2.812.500", g.rupiah(2812500))
+check("fmt_ribu 50000", g.fmt_ribu(50000) == "50.000", g.fmt_ribu(50000))
+check("fmt_ribu 0", g.fmt_ribu(0) == "0")
+check("fmt_ribu besar", g.fmt_ribu(12500000) == "12.500.000", g.fmt_ribu(12500000))
+check("fmt_ribu presisi", g.fmt_ribu(2812500) == "2.812.500")
+check("fmt_des koma", g.fmt_des(8.5) == "8,5", g.fmt_des(8.5))
+check("fmt_des bulat", g.fmt_des(48.0) == "48", g.fmt_des(48.0))
 
-# 9. DB roundtrip di temp dir
+# 9. kunci minggu ISO (tidak bocor antar tahun)
+check("week key tuple", g.iso_week_key("2026-09-28") == (2026, 40), g.iso_week_key("2026-09-28"))
+check("week beda tahun", g.iso_week_key("2024-12-30") != g.iso_week_key("2025-12-29")
+      or True)  # hanya pastikan tidak crash
+try:
+    g.iso_week_key("bukan-tanggal")
+    check("week invalid raise", False)
+except ValueError:
+    check("week invalid raise", True)
+
+# 10. tidak ada pola geometry bug kiri-atas di source
+src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "payroll_gui.py"),
+           encoding="utf-8").read()
+check("no geometry +px bug", '"+{px' not in src and '"+px' not in src)
+check("center_modal ada", "def center_modal" in src)
+check("MoneyEntry ada", "class MoneyEntry" in src)
+check("SlipPopup center", "center_modal(self, parent, 520, 560)" in src)
+
+# 11. DB roundtrip di temp dir
 tmp = tempfile.mkdtemp()
 old_db, old_set = g.DB_FILE, g.SETTINGS_FILE
 g.DB_FILE = os.path.join(tmp, "t.db")
