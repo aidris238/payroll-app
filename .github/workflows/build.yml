@@ -48,11 +48,6 @@ jobs:
         run: |
           pyinstaller payroll_gui.spec
 
-      - name: Rename for Windows
-        if: runner.os == 'Windows'
-        run: |
-          mv dist/payroll.exe dist/payroll${{ matrix.ext }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
