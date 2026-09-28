@@ -38,41 +38,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller certifi rich
 
-      - name: Locate Python DLL (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $dll = python -c "import sys, os; dll=os.path.join(sys.base_exec_prefix, 'python311.dll'); print(dll if os.path.exists(dll) else '')"
-          if (-not (Test-Path $dll)) {
-            $dll = python -c "import sys, os; dll=os.path.join(sys.exec_prefix, 'python311.dll'); print(dll if os.path.exists(dll) else '')"
-          }
-          if (-not (Test-Path $dll)) {
-            $dll = Get-ChildItem -Path (Split-Path (Get-Command python).Source) -Recurse -Filter "python311.dll" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-          }
-          if (-not (Test-Path $dll)) {
-            Write-Error "Python DLL not found"
-            exit 1
-          }
-          Write-Host "Found Python DLL: $dll"
-          echo "PYTHON_DLL=$dll" >> $env:GITHUB_ENV
-
       - name: Build executable (Linux)
         if: runner.os == 'Linux'
         run: |
-          pyinstaller --onefile --strip --optimize=2 --name ${{ matrix.binary_name }} payroll.py
+          pyinstaller --onefile --strip --optimize=1 --name ${{ matrix.binary_name }} payroll.py
 
       - name: Build executable (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
-        env:
-          PYTHON_DLL: ${{ env.PYTHON_DLL }}
         run: |
-          if (-not (Test-Path $env:PYTHON_DLL)) {
-            Write-Error "Python DLL not found at $env:PYTHON_DLL"
-            exit 1
-          }
-          Write-Host "Bundling Python DLL: $env:PYTHON_DLL"
-          pyinstaller --onefile --strip --optimize=2 --name ${{ matrix.binary_name }} --add-binary "$env:PYTHON_DLL;." payroll.py
+          pyinstaller payroll_windows.spec
 
       - name: Rename for Windows
         if: runner.os == 'Windows'
