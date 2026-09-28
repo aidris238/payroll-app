@@ -86,6 +86,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          TAG=${{ github.ref_name }}
           cat > release_notes.md << 'EOF'
           ## 📊 Aplikasi Penggajian Karyawan
 
@@ -105,8 +106,8 @@ jobs:
 
           Final size: Linux 12 MB, Windows 10 MB
           EOF
-          gh release create v1.1.0 \
+          gh release create "$TAG" \
             release/payroll \
             release/payroll.exe \
-            --title "v1.1.0 - Payroll App Windows & Linux" \
+            --title "$TAG - Payroll App Windows & Linux" \
             --notes-file release_notes.md
